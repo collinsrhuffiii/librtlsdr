@@ -85,12 +85,13 @@ endif()
 add_executable(rtl_sdr rtl_sdr.c)
 add_executable(rtl_tcp rtl_tcp.c)
 add_executable(rtl_test rtl_test.c)
+add_executable(test_async test_async.c)
 add_executable(rtl_fm rtl_fm.c)
 add_executable(rtl_eeprom rtl_eeprom.c)
 add_executable(rtl_adsb rtl_adsb.c)
 add_executable(rtl_power rtl_power.c)
 add_executable(rtl_biast rtl_biast.c)
-set(INSTALL_TARGETS rtlsdr rtlsdr_static rtl_sdr rtl_tcp rtl_test rtl_fm rtl_eeprom rtl_adsb rtl_power rtl_biast)
+set(INSTALL_TARGETS rtlsdr rtlsdr_static rtl_sdr rtl_tcp rtl_test test_async rtl_fm rtl_eeprom rtl_adsb rtl_power rtl_biast)
 
 target_link_libraries(rtl_sdr rtlsdr convenience_static
     ${LIBUSB_LIBRARIES}
@@ -101,6 +102,10 @@ target_link_libraries(rtl_tcp rtlsdr convenience_static
     ${CMAKE_THREAD_LIBS_INIT}
 )
 target_link_libraries(rtl_test rtlsdr convenience_static
+    ${LIBUSB_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT}
+)
+target_link_libraries(test_async rtlsdr convenience_static
     ${LIBUSB_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
 )
@@ -147,6 +152,7 @@ target_link_libraries(rtl_biast libgetopt_static)
 set_property(TARGET rtl_sdr APPEND PROPERTY COMPILE_DEFINITIONS "rtlsdr_STATIC" )
 set_property(TARGET rtl_tcp APPEND PROPERTY COMPILE_DEFINITIONS "rtlsdr_STATIC" )
 set_property(TARGET rtl_test APPEND PROPERTY COMPILE_DEFINITIONS "rtlsdr_STATIC" )
+set_property(TARGET test_async APPEND PROPERTY COMPILE_DEFINITIONS "rtlsdr_STATIC" )
 set_property(TARGET rtl_fm APPEND PROPERTY COMPILE_DEFINITIONS "rtlsdr_STATIC" )
 set_property(TARGET rtl_eeprom APPEND PROPERTY COMPILE_DEFINITIONS "rtlsdr_STATIC" )
 set_property(TARGET rtl_adsb APPEND PROPERTY COMPILE_DEFINITIONS "rtlsdr_STATIC" )
@@ -157,11 +163,11 @@ endif()
 # Install built library files & utilities
 ########################################################################
 install(TARGETS rtlsdr EXPORT RTLSDR-export
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} # .so/.dylib file
+  DESTINATION . # .so/.dylib file
   )
 install(TARGETS rtlsdr_static EXPORT RTLSDR-export
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} # .so/.dylib file
   )
-install(TARGETS rtl_sdr rtl_tcp rtl_test rtl_fm rtl_eeprom rtl_adsb rtl_power
+install(TARGETS rtl_sdr rtl_tcp rtl_test test_async rtl_fm rtl_eeprom rtl_adsb rtl_power
   DESTINATION ${CMAKE_INSTALL_BINDIR}
   )

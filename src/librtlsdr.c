@@ -1857,6 +1857,14 @@ int rtlsdr_read_async(rtlsdr_dev_t *dev, rtlsdr_read_async_cb_t cb, void *ctx,
 	struct timeval zerotv = { 0, 0 };
 	enum rtlsdr_async_status next_status = RTLSDR_INACTIVE;
 
+    printf("rtl_sdr_read_async_1: %d\n", dev->async_status);
+	if (RTLSDR_INACTIVE == dev->async_status)
+        printf("rtl_sdr_read_async_1: RTLSDR_INACTIVE\n");
+	if (RTLSDR_RUNNING == dev->async_status)
+        printf("rtl_sdr_read_async_1: RTLSDR_RUNNING\n");
+	if (RTLSDR_CANCELING == dev->async_status)
+        printf("rtl_sdr_read_async_1: RTLSDR_CANCELING\n");
+
 	if (!dev)
 		return -1;
 
@@ -1894,13 +1902,13 @@ int rtlsdr_read_async(rtlsdr_dev_t *dev, rtlsdr_read_async_cb_t cb, void *ctx,
 		r = libusb_submit_transfer(dev->xfer[i]);
 		if (r < 0) {
 			fprintf(stderr, "Failed to submit transfer %i\n"
-					"Please increase your allowed " 
+					"Please increase your allowed "
 					"usbfs buffer size with the "
 					"following command:\n"
 					"echo 0 > /sys/module/usbcore"
 					"/parameters/usbfs_memory_mb\n", i);
 			dev->async_status = RTLSDR_CANCELING;
-			break;
+			return -1;
 		}
 	}
 
@@ -1964,18 +1972,24 @@ int rtlsdr_cancel_async(rtlsdr_dev_t *dev)
 
 	/* if streaming, try to cancel gracefully */
 	if (RTLSDR_RUNNING == dev->async_status) {
+        printf("RTLSDR_RUNNING\n");
 		dev->async_status = RTLSDR_CANCELING;
 		dev->async_cancel = 1;
 		return 0;
 	}
 
 	/* if called while in pending state, change the state forcefully */
-#if 0
 	if (RTLSDR_INACTIVE != dev->async_status) {
-		dev->async_status = RTLSDR_INACTIVE;
+        printf("RTLSDR_INACTIVE\n");
+		dev->async_status = RTLSDR_CANCELING;
 		return 0;
 	}
-#endif
+
+	if (RTLSDR_CANCELING != dev->async_status) {
+        printf("RTLSDR_CANCELING\n");
+		dev->async_status = RTLSDR_CANCELING;
+		return 0;
+	}
 	return -2;
 }
 
